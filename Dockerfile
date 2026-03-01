@@ -10,7 +10,7 @@ LABEL maintainer="Jacob Alberty <jacob.alberty@foundigital.com>"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG PKGURL=https://dl.ui.com/unifi/10.0.162/unifi_sysvinit_all.deb
+ARG PKGURL=https://dl.ui.com/unifi/10.1.85/unifi_sysvinit_all.deb
 
 ENV BASEDIR=/usr/lib/unifi \
     DATADIR=/unifi/data \
@@ -54,7 +54,6 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
  && chmod +x /usr/local/bin/docker-build.sh \
  && chmod -R +x /usr/local/docker/pre_build
 
-# Push installing openjdk-8-jre first, so that the unifi package doesn't pull in openjdk-7-jre as a dependency? Else uncomment and just go with openjdk-7.
 RUN set -ex \
  && mkdir -p /usr/share/man/man1/ \
  && groupadd -r unifi -g $UNIFI_GID \

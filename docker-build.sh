@@ -36,10 +36,42 @@ apt-get install -qy --no-install-recommends \
     dirmngr \
     gpg \
     gpg-agent \
-    openjdk-17-jre-headless \
     procps \
     libcap2-bin \
     tzdata
+
+# --- temurin-25-jdk (required by unifi.deb on newer Ubuntu) ---
+apt install -y wget apt-transport-https gpg
+wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null
+
+echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
+
+apt-get update
+apt-get install -qy --no-install-recommends \
+  temurin-25-jre
+# --- end temurin-25-jdk ---
+
+# --- MongoDB (required by unifi.deb on newer Ubuntu) ---
+apt-get update
+apt-get install -qy --no-install-recommends ca-certificates gnupg
+
+install -d /usr/share/keyrings
+curl -fsSL https://pgp.mongodb.com/server-4.4.asc \
+  | gpg --dearmor -o /usr/share/keyrings/mongodb-server-4.4.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/mongodb-server-4.4.gpg] \
+https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" \
+  > /etc/apt/sources.list.d/mongodb-org-4.4.list
+
+apt-get update
+
+# Pin to 4.4 so we never pull an update (unifi wants < 8.1.0)
+apt-get install -qy --no-install-recommends \
+  mongodb-org-server=4.4.* mongodb-org-shell=4.4.* mongodb-org-mongos=4.4.* mongodb-org-tools=4.4.*
+
+apt-mark hold mongodb-org-server mongodb-org-shell mongodb-org-mongos mongodb-org-tools
+# --- end MongoDB ---
+
 echo 'deb https://www.ui.com/downloads/unifi/debian stable ubiquiti' | tee /etc/apt/sources.list.d/100-ubnt-unifi.list
 tryfail apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 06E85760C0A52C50
 
